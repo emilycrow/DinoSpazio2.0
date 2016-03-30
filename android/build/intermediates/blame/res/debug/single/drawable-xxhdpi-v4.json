@@ -18,5 +18,9 @@
     {
         "merged": "C:\\Users\\miche\\Desktop\\escritorio\\DinoSpazio\\android\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi-v4\\ic_launcher.png",
         "source": "C:\\Users\\miche\\Desktop\\escritorio\\DinoSpazio\\android\\res\\drawable-xxhdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\miche\\Desktop\\DinoSpazio\\android\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi-v4\\dino_launcher.png",
+        "source": "C:\\Users\\miche\\Desktop\\DinoSpazio\\android\\res\\drawable-xxhdpi\\dino_launcher.png"
     }
 ]

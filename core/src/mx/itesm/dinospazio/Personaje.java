@@ -93,7 +93,7 @@ public class Personaje {
             case MOV_DERECHA:
                 // Prueba que no salga del mundo
                 nuevaX += VELOCIDAD_X;
-                if (nuevaX<=PantallaJuego.ANCHO_MUNDO-sprite.getWidth()) {
+                if (nuevaX<=PantallaJuego.ANCHO_MAPA-sprite.getWidth()) {
                     sprite.setX(nuevaX);
                 }
                 break;
