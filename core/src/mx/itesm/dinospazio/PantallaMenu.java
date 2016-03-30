@@ -36,6 +36,8 @@ public class PantallaMenu implements Screen {
     // Opciones
     private Texture texturaPlay;
     private Texture texturaAbout;
+    private Texture texturaSalir;
+    private Boton btnSalir;
     private Boton btnPlay;
     private Boton btnAbout;
 
@@ -73,6 +75,7 @@ public class PantallaMenu implements Screen {
     ("btnAbout.png");*/
 
         assetManager.load("DINOSPAZIOFONDO.png", Texture.class);    // Cargar imagen
+        assetManager.load("exit2.png",Texture.class);//boton salida
         assetManager.load("btnAbout.png", Texture.class);
         assetManager.load("btnPlay.png", Texture.class);
         // Texturas de los botones
@@ -87,6 +90,7 @@ public class PantallaMenu implements Screen {
         texturaMenu = assetManager.get("DINOSPAZIOFONDO.png");
         texturaPlay = assetManager.get("btnPlay.png");
         texturaAbout = assetManager.get("btnAbout.png");
+        texturaSalir=assetManager.get("exit2.png");
 
         btnAbout = new Boton(texturaAbout);
         btnAbout.setPosicion(Plataforma.ANCHO_CAMARA / 4 - texturaAbout.getWidth() / 2,
@@ -94,6 +98,14 @@ public class PantallaMenu implements Screen {
         btnPlay = new Boton(texturaPlay);
         btnPlay.setPosicion(3 * Plataforma.ANCHO_CAMARA / 4 - texturaPlay.getWidth() / 2,
                 Plataforma.ALTO_CAMARA / 2 - texturaPlay.getHeight() / 2);
+
+        btnSalir = new Boton(texturaSalir);
+        btnSalir.setPosicion(Plataforma.ANCHO_CAMARA / 14 - texturaSalir.getWidth() / 2,
+                Plataforma.ALTO_CAMARA / 12 - texturaSalir.getHeight() / 2);
+        /* btnSalir.setPosition(Principal.ANCHO_MUNDO / 14 - spriteBtnSalir.getWidth() / 2,
+                Principal.ALTO_MUNDO / 12 );*/
+
+
     }
 
     /*
@@ -114,6 +126,7 @@ public class PantallaMenu implements Screen {
         batch.draw(texturaMenu, 0, 0);
         btnAbout.render(batch);
         btnPlay.render(batch);
+        btnSalir.render(batch);
         batch.end();
     }
 
@@ -150,6 +163,7 @@ public class PantallaMenu implements Screen {
         assetManager.unload("DINOSPAZIOFONDO.png");
         assetManager.unload("btnPlay.png");
         assetManager.unload("btnAbout.png");
+        assetManager.unload("exit2.png");
     }
 
     /*
@@ -204,14 +218,5 @@ public class PantallaMenu implements Screen {
             y = coordenadas.y;
         }
 
-
-       /* @Override
-        public void dispose() {
-            // Cuando la PantallaMenu sale de memoria.
-            // LIBERAR los recursos
-            texturaPlay.dispose();
-            texturaAbout.dispose();
-            texturaMenu.dispose(); // regresamos la memoria
-        }*/
     }
 }
