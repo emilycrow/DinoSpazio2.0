@@ -3,7 +3,9 @@ package mx.itesm.dinospazio;
 
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -18,143 +20,198 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 
 public class PantallaMenu implements Screen {
-    private final Principal principal;
+    // Referencia al objeto de tipo Game (tiene setScreen para cambiar de pantalla)
+    private Plataforma plataforma;
+
+    // La cámara y vista principal
     private OrthographicCamera camara;
     private Viewport vista;
 
-    // Fondo
-    private Texture texturaFondo;
-    private Sprite spriteFondo;
-
-
-    // Botón play
-    private Texture texturaBtnPlay;
-    private Sprite spriteBtnPlay;
-
-    // Botón acercade
-    private Texture texturaBtnAcerca;
-    private Sprite spriteBtnAcerca;
-
-
-    // Botón salir
-    private Texture texturaBtnSalir;
-    private Sprite spriteBtnSalir;
-
-    // Dibujar
+    // Objeto para dibujar en la pantalla
     private SpriteBatch batch;
 
-    public PantallaMenu(Principal principal) {
-        this.principal = principal;
+    // Fondo
+    private Texture texturaMenu;
+
+    // Opciones
+    private Texture texturaPlay;
+    private Texture texturaAbout;
+    private Boton btnPlay;
+    private Boton btnAbout;
+
+    public PantallaMenu(Plataforma plataforma) {
+        this.plataforma = plataforma;
     }
 
-
+    /*
+    Se ejecuta al mostrar este Screen como pantalla de la app
+     */
     @Override
     public void show() {
-        // Se ejecuta cuando se muestra la pantalla
-        camara = new OrthographicCamera(Principal.ANCHO_MUNDO, Principal.ALTO_MUNDO);
-        camara.position.set(Principal.ANCHO_MUNDO / 2, Principal.ALTO_MUNDO / 2, 0);
+        // Crea la cámara/vista
+        camara = new OrthographicCamera(Plataforma.ANCHO_CAMARA, Plataforma.ALTO_CAMARA);
+        camara.position.set(Plataforma.ANCHO_CAMARA / 2, Plataforma.ALTO_CAMARA / 2, 0);
         camara.update();
-        vista = new StretchViewport(Principal.ANCHO_MUNDO, Principal.ALTO_MUNDO, camara);
+        vista = new StretchViewport(Plataforma.ANCHO_CAMARA, Plataforma.ALTO_CAMARA, camara);
 
         batch = new SpriteBatch();
 
-        cargarTexturasSprites();
+        cargarRecursos();
+        crearObjetos();
+
+        Gdx.input.setInputProcessor(new ProcesadorEntrada());
     }
 
-    private void cargarTexturasSprites() {
-        // Fondo
-        texturaFondo = new Texture(Gdx.files.internal("menu2.0.jpg"));
-        spriteFondo = new Sprite(texturaFondo);
-        // Btn Play
-        texturaBtnPlay = new Texture(Gdx.files.internal("btnPlay.png"));
-        spriteBtnPlay = new Sprite(texturaBtnPlay);
-        spriteBtnPlay.setPosition(Principal.ANCHO_MUNDO / 2 - spriteBtnPlay.getWidth() / 2,
-                (Principal.ALTO_MUNDO / 2)-20);
-        //Btn Acerca de
-        texturaBtnAcerca = new Texture(Gdx.files.internal("btnAbout.png" ));
-        spriteBtnAcerca = new Sprite(texturaBtnAcerca);
-        spriteBtnAcerca.setPosition(Principal.ANCHO_MUNDO / 2 - spriteBtnAcerca.getWidth() / 2,
-                Principal.ALTO_MUNDO / 3);
+    // Carga los recursos a través del administrador de assets
+    private void cargarRecursos() {
+        // Cargar las texturas/mapas
+        AssetManager assetManager = plataforma.getAssetManager();   // Referencia al assetManager
 
-        // Btn Salir
-        texturaBtnSalir = new Texture(Gdx.files.internal("exit2.png"));
-        spriteBtnSalir = new Sprite(texturaBtnSalir);
-        spriteBtnSalir.setPosition(Principal.ANCHO_MUNDO /14 - spriteBtnSalir.getWidth() /2,
-                (Principal.ALTO_MUNDO /18)-70);
+    /* Nombre de
+    assetManager.unload("DINOSPAZIOFONDO.png");
+        assetManager.unload("btnPlay.png");
+        assetManager.unload("btnAbout.png");*/
+
+        assetManager.load("DINOSPAZIOFONDO.png", Texture.class);    // Cargar imagen
+        assetManager.load("btnAbout.png", Texture.class);
+        assetManager.load("btnPlay.png", Texture.class);
+        // Texturas de los botones
+
+        // Se bloquea hasta que cargue todos los recursos
+        assetManager.finishLoading();
     }
 
+    private void crearObjetos() {
+        AssetManager assetManager = plataforma.getAssetManager();   // Referencia al assetManager
+
+        texturaMenu = assetManager.get("DINOSPAZIOFONDO.png");
+        texturaPlay = assetManager.get("btnPlay.png");
+        texturaAbout = assetManager.get("btnAbout.png");
+
+        btnAbout = new Boton(texturaAbout);
+        btnAbout.setPosicion(Plataforma.ANCHO_CAMARA / 4 - texturaAbout.getWidth() / 2,
+                Plataforma.ALTO_CAMARA / 2 - texturaAbout.getHeight() / 2);
+        btnPlay = new Boton(texturaPlay);
+        btnPlay.setPosicion(3 * Plataforma.ANCHO_CAMARA / 4 - texturaPlay.getWidth() / 2,
+                Plataforma.ALTO_CAMARA / 2 - texturaPlay.getHeight() / 2);
+    }
+
+    /*
+    Dibuja TODOS los elementos del juego en la pantalla.
+    Este método se está ejecutando muchas veces por segundo.
+     */
     @Override
-    public void render(float delta) {
-        // Borrar la pantalla
-        Gdx.gl.glClearColor(1, 1, 1, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        // Proyectamos la cámara sobre batch
-        batch.setProjectionMatrix(camara.combined);
-        // Dibujamos
-        leerEntrada();
+    public void render(float delta) { // delta es el tiempo entre frames (Gdx.graphics.getDeltaTime())
 
+        // Dibujar
+        borrarPantalla();
+
+        batch.setProjectionMatrix(camara.combined);
+
+        // Entre begin-end dibujamos nuestros objetos en pantalla
         batch.begin();
-        spriteFondo.draw(batch);
-        spriteBtnPlay.draw(batch);
-        spriteBtnAcerca.draw(batch);
-        spriteBtnSalir.draw(batch);
+
+        batch.draw(texturaMenu, 0, 0);
+        btnAbout.render(batch);
+        btnPlay.render(batch);
         batch.end();
     }
 
-    private void leerEntrada() {
-        if (Gdx.input.justTouched() == true) {
-            Vector3 coordenadas = new Vector3();
-            coordenadas.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-            camara.unproject(coordenadas); // Transforma las coord
-            float touchX = coordenadas.x;
-            float touchY = coordenadas.y;
-            // CAMBIAR
-            if (touchX >= spriteBtnSalir.getX() &&
-                    touchX <= spriteBtnSalir.getX() + spriteBtnSalir.getWidth()
-                    && touchY >= spriteBtnSalir.getY()
-                    && touchY <= spriteBtnSalir.getY() + spriteBtnSalir.getHeight()) {
-                Gdx.app.exit();
-            } else if (touchX >= spriteBtnPlay.getX() &&
-                    touchX <= spriteBtnPlay.getX() + spriteBtnPlay.getWidth()
-                    && touchY >= spriteBtnPlay.getY()
-                    && touchY <= spriteBtnPlay.getY() + spriteBtnPlay.getHeight()) {
-                // Lanzar la pantalla de juego
-                principal.setScreen(new mx.itesm.dinospazio.PantallaJuego(principal));
-            } else if (touchX >= spriteBtnAcerca.getX() &&
-                    touchX <= spriteBtnAcerca.getX() + spriteBtnAcerca.getWidth()
-                    && touchY >= spriteBtnAcerca.getY()
-                    && touchY <= spriteBtnAcerca.getY() + spriteBtnAcerca.getHeight()) {
-                // Lanzar la pantalla de acerca de
-                principal.setScreen(new PantallaAcerca(principal));
-
-
-            }
-        }
+    private void borrarPantalla() {
+        Gdx.gl.glClearColor(0.42f, 0.55f, 1, 1);    // r, g, b, alpha
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     }
+
     @Override
-    public void resize ( int width, int height){
+    public void resize(int width, int height) {
         vista.update(width, height);
     }
 
     @Override
-    public void pause () {
+    public void pause() {
 
     }
 
     @Override
-    public void resume () {
+    public void resume() {
 
     }
 
     @Override
-    public void hide () {
+    public void hide() {
 
     }
 
+    // Libera los assets
     @Override
-    public void dispose () {
-        // Cuando la PantallaMenu sale de memoria.
-        // LIBERAR los recursos
-        texturaFondo.dispose(); // regresamos la memoria
+    public void dispose() {
+        // Los assets se liberan a través del assetManager
+        AssetManager assetManager = plataforma.getAssetManager();
+        assetManager.unload("DINOSPAZIOFONDO.png");
+        assetManager.unload("btnPlay.png");
+        assetManager.unload("btnAbout.png");
+    }
+
+    /*
+    Clase utilizada para manejar los eventos de touch en la pantalla
+     */
+    public class ProcesadorEntrada extends InputAdapter {
+        private Vector3 coordenadas = new Vector3();
+        private float x, y;     // Las coordenadas en la pantalla
+
+        /*
+        Se ejecuta cuando el usuario PONE un dedo sobre la pantalla, los dos primeros parámetros
+        son las coordenadas relativas a la pantalla física (0,0) en la esquina superior izquierda
+        pointer - es el número de dedo que se pone en la pantalla, el primero es 0
+        button - el botón del mouse
+         */
+        @Override
+        public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+            transformarCoordenadas(screenX, screenY);
+
+            return true;    // Indica que ya procesó el evento
+        }
+
+        /*
+        Se ejecuta cuando el usuario QUITA el dedo de la pantalla.
+         */
+        @Override
+        public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+            transformarCoordenadas(screenX, screenY);
+
+            if (btnPlay.contiene(x, y)) {
+                plataforma.setScreen(new PantallaCargando(plataforma));
+            }
+            return true;    // Indica que ya procesó el evento
+        }
+
+
+        // Se ejecuta cuando el usuario MUEVE el dedo sobre la pantalla
+        @Override
+        public boolean touchDragged(int screenX, int screenY, int pointer) {
+            transformarCoordenadas(screenX, screenY);
+
+            return true;
+        }
+
+
+        private void transformarCoordenadas(int screenX, int screenY) {
+            // Transformar las coordenadas de la pantalla física a la cámara HUD
+            coordenadas.set(screenX, screenY, 0);
+            camara.unproject(coordenadas);
+            // Obtiene las coordenadas relativas a la pantalla virtual
+            x = coordenadas.x;
+            y = coordenadas.y;
+        }
+
+
+       /* @Override
+        public void dispose() {
+            // Cuando la PantallaMenu sale de memoria.
+            // LIBERAR los recursos
+            texturaPlay.dispose();
+            texturaAbout.dispose();
+            texturaMenu.dispose(); // regresamos la memoria
+        }*/
     }
 }
