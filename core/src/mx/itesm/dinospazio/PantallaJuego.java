@@ -131,7 +131,7 @@ public class PantallaJuego implements Screen
         rendererMapa = new OrthogonalTiledMapRenderer(mapa,batch);
         rendererMapa.setView(camara);
         // Cargar frames
-        texturaPersonaje = assetManager.get("marioSprite.png");
+        texturaPersonaje = assetManager.get("DINOPASOSPRITE.png");
         // Crear el personaje
         mario = new Personaje(texturaPersonaje);
         // Posición inicial del personaje
