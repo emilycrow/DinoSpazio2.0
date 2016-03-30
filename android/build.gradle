@@ -15,7 +15,7 @@ android {
         instrumentTest.setRoot('tests')
     }
     defaultConfig {
-        applicationId "mx.itesm.dinospazio"
+        applicationId "mx.itesm.wahcamole"
         minSdkVersion 8
         targetSdkVersion 23
     }
@@ -64,7 +64,7 @@ task run(type: Exec) {
     }
 
     def adb = path + "/platform-tools/adb"
-    commandLine "$adb", 'shell', 'am', 'start', '-n', 'mx.itesm.dinospazio/mx.itesm.dinospazio.AndroidLauncher'
+    commandLine "$adb", 'shell', 'am', 'start', '-n', 'mx.itesm.wahcamole/mx.itesm.wahcamole.AndroidLauncher'
 }
 
 // sets up the Android Eclipse project, using the old Ant based build.
