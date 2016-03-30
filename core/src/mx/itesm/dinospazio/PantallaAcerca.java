@@ -1,4 +1,4 @@
-package mx.itesm.dinospazio;
+package mx.itesm.dinospazio.;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -59,10 +59,10 @@ public class PantallaAcerca implements Screen {
         spriteFondo = new Sprite(texturaFondo);
 
         //Boton de regreso
-        texturaBtnRegreso = new Texture(Gdx.files.internal("home.png"));
+        texturaBtnRegreso = new Texture(Gdx.files.internal("RETURN.png"));
         spriteBtnRegreso = new Sprite(texturaBtnRegreso);
-        spriteBtnRegreso.setPosition(Principal.ANCHO_MUNDO / 16 - spriteBtnRegreso.getWidth() / 2,
-                (Principal.ALTO_MUNDO / 16)-70 );
+        spriteBtnRegreso.setPosition(Principal.ANCHO_MUNDO / 14 - spriteBtnRegreso.getWidth() / 2,
+                Principal.ALTO_MUNDO / 12 );
 
     }
 
