@@ -67,10 +67,10 @@ public class PantallaMenu implements Screen {
         // Cargar las texturas/mapas
         AssetManager assetManager = plataforma.getAssetManager();   // Referencia al assetManager
 
-    /* Nombre de
-    assetManager.unload("DINOSPAZIOFONDO.png");
-        assetManager.unload("btnPlay.png");
-        assetManager.unload("btnAbout.png");*/
+    /* Nombre de texturas
+    ("DINOSPAZIOFONDO.png");
+    ("btnPlay.png");
+    ("btnAbout.png");*/
 
         assetManager.load("DINOSPAZIOFONDO.png", Texture.class);    // Cargar imagen
         assetManager.load("btnAbout.png", Texture.class);
