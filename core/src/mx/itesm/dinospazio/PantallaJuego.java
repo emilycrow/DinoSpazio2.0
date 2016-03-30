@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -17,7 +16,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-
 /**
  * Created by miche on 26/03/2016.
  */
@@ -34,10 +32,6 @@ public class PantallaJuego implements Screen
     private OrthographicCamera camara;
     private Viewport vista;
 
-    //Sonidos
-    private Sound efectoGolpe; //Efecto
-    private Music musicaFondo;  //Musica de fondo
-
     // Objeto para dibujar en la pantalla
     private SpriteBatch batch;
 
@@ -47,7 +41,7 @@ public class PantallaJuego implements Screen
 
     // Personaje
     private Texture texturaPersonaje;       // Aquí cargamos la imagen marioSprite.png con varios frames
-    private Personaje dino;
+    private Personaje mario;
     public static final int TAM_CELDA = 16;
 
     // HUD. Los componentes en la pantalla que no se mueven
@@ -99,11 +93,6 @@ public class PantallaJuego implements Screen
         //cargarRecursos();
         crearObjetos();
 
-        efectoGolpe= Gdx.audio.newSound(Gdx.files.internal("Punch Sound Effect.mp3"));
-        musicaFondo= Gdx.audio.newMusic(Gdx.files.internal("musicaFondo.mp3"));
-        musicaFondo.setLooping(true);   ///Infinito
-        musicaFondo.play();
-
         // Indicar el objeto que atiende los eventos de touch (entrada en general)
         Gdx.input.setInputProcessor(new ProcesadorEntrada());
 
@@ -136,7 +125,7 @@ public class PantallaJuego implements Screen
     private void crearObjetos() {
         AssetManager assetManager = plataforma.getAssetManager();   // Referencia al assetManager
         // Carga el mapa en memoria
-        mapa = assetManager.get("Mapa.tmx");
+        mapa = assetManager.get("mapaNivel1.tmx");
         //mapa.getLayers().get(0).setVisible(false);    // Pueden ocultar una capa así
         // Crear el objeto que dibujará el mapa
         rendererMapa = new OrthogonalTiledMapRenderer(mapa,batch);
@@ -144,9 +133,9 @@ public class PantallaJuego implements Screen
         // Cargar frames
         texturaPersonaje = assetManager.get("marioSprite.png");
         // Crear el personaje
-        dino = new Personaje(texturaPersonaje);
+        mario = new Personaje(texturaPersonaje);
         // Posición inicial del personaje
-        dino.getSprite().setPosition(Plataforma.ANCHO_CAMARA / 10, Plataforma.ALTO_CAMARA * 0.90f);
+        mario.getSprite().setPosition(Plataforma.ANCHO_CAMARA / 10, Plataforma.ALTO_CAMARA * 0.90f);
 
         // Crear los botones
         texturaBtnIzquierda = assetManager.get("izquierda.png");
@@ -197,7 +186,7 @@ public class PantallaJuego implements Screen
         // Entre begin-end dibujamos nuestros objetos en pantalla
         batch.begin();
 
-        dino.render(batch);    // Dibuja el personaje
+        mario.render(batch);    // Dibuja el personaje
 
         batch.end();
 
@@ -221,7 +210,7 @@ public class PantallaJuego implements Screen
     // Actualiza la posición de la cámara para que el personaje esté en el centro,
     // excepto cuando está en la primera y última parte del mundo
     private void actualizarCamara() {
-        float posX = dino.getX();
+        float posX = mario.getX();
         // Si está en la parte 'media'
         if (posX>=Plataforma.ANCHO_CAMARA/2 && posX<=ANCHO_MAPA-Plataforma.ANCHO_CAMARA/2) {
             // El personaje define el centro de la cámara
@@ -238,12 +227,12 @@ public class PantallaJuego implements Screen
      */
     private void moverPersonaje() {
         // Prueba caída libre inicial o movimiento horizontal
-        switch (dino.getEstadoMovimiento()) {
+        switch (mario.getEstadoMovimiento()) {
             case INICIANDO:     // Mueve el personaje en Y hasta que se encuentre sobre un bloque
                 // Los bloques en el mapa son de 16x16
                 // Calcula la celda donde estaría después de moverlo
-                int celdaX = (int)(dino.getX()/ TAM_CELDA);
-                int celdaY = (int)((dino.getY()+dino.VELOCIDAD_Y)/ TAM_CELDA);
+                int celdaX = (int)(mario.getX()/ TAM_CELDA);
+                int celdaY = (int)((mario.getY()+mario.VELOCIDAD_Y)/ TAM_CELDA);
                 // Recuperamos la celda en esta posición
                 // La capa 0 es el fondo
                 TiledMapTileLayer capa = (TiledMapTileLayer)mapa.getLayers().get(1);
@@ -251,11 +240,11 @@ public class PantallaJuego implements Screen
                 // probar si la celda está ocupada
                 if (celda==null) {
                     // Celda vacía, entonces el personaje puede avanzar
-                    dino.caer();
+                    mario.caer();
                 }  else if ( !esEstrella(celda) ) {  // Las estrellas no lo detienen :)
                     // Dejarlo sobre la celda que lo detiene
-                    dino.setPosicion(dino.getX(), (celdaY + 1) * TAM_CELDA);
-                    dino.setEstadoMovimiento(Personaje.EstadoMovimiento.QUIETO);
+                    mario.setPosicion(mario.getX(), (celdaY + 1) * TAM_CELDA);
+                    mario.setEstadoMovimiento(Personaje.EstadoMovimiento.QUIETO);
                 }
                 break;
             case MOV_DERECHA:       // Se mueve horizontal
@@ -265,11 +254,11 @@ public class PantallaJuego implements Screen
         }
 
         // Prueba si debe caer por llegar a un espacio vacío
-        if ( dino.getEstadoMovimiento()!= Personaje.EstadoMovimiento.INICIANDO
-                && (dino.getEstadoSalto() != Personaje.EstadoSalto.SUBIENDO) ) {
+        if ( mario.getEstadoMovimiento()!= Personaje.EstadoMovimiento.INICIANDO
+                && (mario.getEstadoSalto() != Personaje.EstadoSalto.SUBIENDO) ) {
             // Calcula la celda donde estaría después de moverlo
-            int celdaX = (int) (dino.getX() / TAM_CELDA);
-            int celdaY = (int) ((dino.getY() + dino.VELOCIDAD_Y) / TAM_CELDA);
+            int celdaX = (int) (mario.getX() / TAM_CELDA);
+            int celdaY = (int) ((mario.getY() + mario.VELOCIDAD_Y) / TAM_CELDA);
             // Recuperamos la celda en esta posición
             // La capa 0 es el fondo
             TiledMapTileLayer capa = (TiledMapTileLayer) mapa.getLayers().get(1);
@@ -278,12 +267,12 @@ public class PantallaJuego implements Screen
             // probar si la celda está ocupada
             if ( (celdaAbajo==null && celdaDerecha==null) || esEstrella(celdaAbajo) || esEstrella(celdaDerecha) ) {
                 // Celda vacía, entonces el personaje puede avanzar
-                dino.caer();
-                dino.setEstadoSalto(Personaje.EstadoSalto.CAIDA_LIBRE);
+                mario.caer();
+                mario.setEstadoSalto(Personaje.EstadoSalto.CAIDA_LIBRE);
             } else {
                 // Dejarlo sobre la celda que lo detiene
-                dino.setPosicion(dino.getX(), (celdaY + 1) * TAM_CELDA);
-                dino.setEstadoSalto(Personaje.EstadoSalto.EN_PISO);
+                mario.setPosicion(mario.getX(), (celdaY + 1) * TAM_CELDA);
+                mario.setEstadoSalto(Personaje.EstadoSalto.EN_PISO);
 
                 if ( esMoneda(celdaAbajo) || esMoneda(celdaDerecha)) {
                     // La encontró!!!!
@@ -296,30 +285,30 @@ public class PantallaJuego implements Screen
         }
 
         // Saltar
-        switch (dino.getEstadoSalto()) {
+        switch (mario.getEstadoSalto()) {
             case SUBIENDO:
             case BAJANDO:
-                dino.actualizarSalto();    // Actualizar posición en 'y'
+                mario.actualizarSalto();    // Actualizar posición en 'y'
                 break;
         }
     }
 
     // Prueba si puede moverse a la izquierda o derecha
     private void probarChoqueParedes() {
-        Personaje.EstadoMovimiento estado = dino.getEstadoMovimiento();
+        Personaje.EstadoMovimiento estado = mario.getEstadoMovimiento();
         // Quitar porque este método sólo se llama cuando se está moviendo
         if ( estado!= Personaje.EstadoMovimiento.MOV_DERECHA && estado!=Personaje.EstadoMovimiento.MOV_IZQUIERDA){
             return;
         }
-        float px = dino.getX();    // Posición actual
+        float px = mario.getX();    // Posición actual
         // Posición después de actualizar
-        px = dino.getEstadoMovimiento()==Personaje.EstadoMovimiento.MOV_DERECHA? px+Personaje.VELOCIDAD_X:
+        px = mario.getEstadoMovimiento()==Personaje.EstadoMovimiento.MOV_DERECHA? px+Personaje.VELOCIDAD_X:
                 px-Personaje.VELOCIDAD_X;
         int celdaX = (int)(px/TAM_CELDA);   // Casilla del personaje en X
-        if (dino.getEstadoMovimiento()== Personaje.EstadoMovimiento.MOV_DERECHA) {
+        if (mario.getEstadoMovimiento()== Personaje.EstadoMovimiento.MOV_DERECHA) {
             celdaX++;   // Casilla del lado derecho
         }
-        int celdaY = (int)(dino.getY()/TAM_CELDA); // Casilla del personaje en Y
+        int celdaY = (int)(mario.getY()/TAM_CELDA); // Casilla del personaje en Y
         TiledMapTileLayer capaPlataforma = (TiledMapTileLayer) mapa.getLayers().get(1);
         if ( capaPlataforma.getCell(celdaX,celdaY) != null || capaPlataforma.getCell(celdaX,celdaY+1) != null ) {
             // Colisionará, dejamos de moverlo
@@ -343,10 +332,10 @@ public class PantallaJuego implements Screen
                     }
                 }, 3);  // 3 segundos
             } else {
-                dino.setEstadoMovimiento(Personaje.EstadoMovimiento.QUIETO);
+                mario.setEstadoMovimiento(Personaje.EstadoMovimiento.QUIETO);
             }
         } else {
-            dino.actualizar();
+            mario.actualizar();
         }
     }
 
@@ -408,7 +397,7 @@ public class PantallaJuego implements Screen
     public void dispose() {
         // Los assets se liberan a través del assetManager
         AssetManager assetManager = plataforma.getAssetManager();
-        assetManager.unload("dinoSprite.png");
+        assetManager.unload("DINOPASOSPRITE.png");
         assetManager.unload("derecha.png");
         assetManager.unload("izquierda.png");
         assetManager.unload("ganaste.png");
@@ -434,15 +423,15 @@ public class PantallaJuego implements Screen
             transformarCoordenadas(screenX, screenY);
             if (estadoJuego==EstadosJuego.JUGANDO) {
                 // Preguntar si las coordenadas están sobre el botón derecho
-                if (btnDerecha.contiene(x, y) && dino.getEstadoMovimiento() != Personaje.EstadoMovimiento.INICIANDO) {
+                if (btnDerecha.contiene(x, y) && mario.getEstadoMovimiento() != Personaje.EstadoMovimiento.INICIANDO) {
                     // Tocó el botón derecha, hacer que el personaje se mueva a la derecha
-                    dino.setEstadoMovimiento(Personaje.EstadoMovimiento.MOV_DERECHA);
-                } else if (btnIzquierda.contiene(x, y) && dino.getEstadoMovimiento() != Personaje.EstadoMovimiento.INICIANDO) {
+                    mario.setEstadoMovimiento(Personaje.EstadoMovimiento.MOV_DERECHA);
+                } else if (btnIzquierda.contiene(x, y) && mario.getEstadoMovimiento() != Personaje.EstadoMovimiento.INICIANDO) {
                     // Tocó el botón izquierda, hacer que el personaje se mueva a la izquierda
-                    dino.setEstadoMovimiento(Personaje.EstadoMovimiento.MOV_IZQUIERDA);
+                    mario.setEstadoMovimiento(Personaje.EstadoMovimiento.MOV_IZQUIERDA);
                 } else if (btnSalto.contiene(x, y)) {
                     // Tocó el botón saltar
-                    dino.saltar();
+                    mario.saltar();
                 }
             } else if (estadoJuego==EstadosJuego.GANO) {
                 if (btnGana.contiene(x,y)) {
@@ -459,9 +448,9 @@ public class PantallaJuego implements Screen
         public boolean touchUp(int screenX, int screenY, int pointer, int button) {
             transformarCoordenadas(screenX, screenY);
             // Preguntar si las coordenadas son de algún botón para DETENER el movimiento
-            if ( dino.getEstadoMovimiento()!= Personaje.EstadoMovimiento.INICIANDO && (btnDerecha.contiene(x, y) || btnIzquierda.contiene(x,y)) ) {
+            if ( mario.getEstadoMovimiento()!= Personaje.EstadoMovimiento.INICIANDO && (btnDerecha.contiene(x, y) || btnIzquierda.contiene(x,y)) ) {
                 // Tocó el botón derecha, hacer que el personaje se mueva a la derecha
-                dino.setEstadoMovimiento(Personaje.EstadoMovimiento.QUIETO);
+                mario.setEstadoMovimiento(Personaje.EstadoMovimiento.QUIETO);
             }
             return true;    // Indica que ya procesó el evento
         }
@@ -472,9 +461,9 @@ public class PantallaJuego implements Screen
         public boolean touchDragged(int screenX, int screenY, int pointer) {
             transformarCoordenadas(screenX, screenY);
             // Acaba de salir de las fechas (y no es el botón de salto)
-            if (x<Plataforma.ANCHO_CAMARA/2 && dino.getEstadoMovimiento()!= Personaje.EstadoMovimiento.QUIETO) {
+            if (x<Plataforma.ANCHO_CAMARA/2 && mario.getEstadoMovimiento()!= Personaje.EstadoMovimiento.QUIETO) {
                 if (!btnIzquierda.contiene(x, y) && !btnDerecha.contiene(x, y) ) {
-                    dino.setEstadoMovimiento(Personaje.EstadoMovimiento.QUIETO);
+                    mario.setEstadoMovimiento(Personaje.EstadoMovimiento.QUIETO);
                 }
             }
             return true;
