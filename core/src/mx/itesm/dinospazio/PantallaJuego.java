@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -20,6 +21,8 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 /**
  * Created by miche on 26/03/2016.
  */
+
+
 public class PantallaJuego implements Screen
 {
     public static final float ANCHO_MAPA = 1280;   // Ancho del mapa en pixeles
@@ -30,6 +33,10 @@ public class PantallaJuego implements Screen
     // La cámara y vista principal
     private OrthographicCamera camara;
     private Viewport vista;
+
+    //Sonidos
+    private Sound efectoGolpe; //Efecto
+    private Music musicaFondo;  //Musica de fondo
 
     // Objeto para dibujar en la pantalla
     private SpriteBatch batch;
@@ -91,6 +98,11 @@ public class PantallaJuego implements Screen
 
         //cargarRecursos();
         crearObjetos();
+
+        efectoGolpe= Gdx.audio.newSound(Gdx.files.internal("Punch Sound Effect.mp3"));
+        musicaFondo= Gdx.audio.newMusic(Gdx.files.internal("musicaFondo.mp3"));
+        musicaFondo.setLooping(true);   ///Infinito
+        musicaFondo.play();
 
         // Indicar el objeto que atiende los eventos de touch (entrada en general)
         Gdx.input.setInputProcessor(new ProcesadorEntrada());
